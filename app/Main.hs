@@ -3,7 +3,7 @@
 module Main where
 
 import Lib
-import Prelude (IO, Integral, (++), (.), div, mod)
+import Prelude ((==), rem, flip, Bool, Integer, (*), IO, Integral, (++), (.), div, mod, concat, map, ($), sum)
 
 import Data.List (reverse)
 
@@ -27,6 +27,28 @@ toDigitsRev = reverse . toDigits
 -- Exercise 2
 --
 
--- Double every other digit starting from the first digit on the right
+-- Double every other digit starting from the second digit on the right
 doubleEveryOther :: Integral a => [a] -> [a]
-doubleEveryOther = map (2*) . reverse
+doubleEveryOther = reverse . everyOther (* 2) . reverse
+
+-- Apply the given function to every other element in the list, starting from
+-- the second element
+everyOther :: (a -> a) -> [a] -> [a]
+everyOther f (x:y:xs) = x : f y : everyOther f xs
+everyOther _ (x)      = x
+
+--
+-- Exercise 3
+--
+
+-- Sum all the digits in the given list of integers
+-- (e.g. [16, 2, 13] = 1 + 6 + 2 + 1 + 3 = 13)
+sumDigits :: Integral a => [a] -> a
+sumDigits xs = sum . concat $ map toDigits xs
+
+--
+-- Exercise 4
+--
+
+validate :: Integer -> Bool
+validate = (==) 0 . flip rem 10 . sumDigits . doubleEveryOther . toDigits

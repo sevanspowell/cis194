@@ -22,3 +22,11 @@ toDigits x = toDigits (x `div` 10) ++ [x `mod` 10]
 -- Decompose a given integer into a list of it's digits, reversed.
 toDigitsRev :: Integral a => a -> [a]
 toDigitsRev = reverse . toDigits
+
+--
+-- Exercise 2
+--
+
+-- Double every other digit starting from the first digit on the right
+doubleEveryOther :: Integral a => [a] -> [a]
+doubleEveryOther = map (2*) . reverse

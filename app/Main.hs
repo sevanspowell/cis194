@@ -3,7 +3,7 @@
 module Main where
 
 import Lib
-import Prelude ((==), rem, flip, Bool, Integer, (*), IO, Integral, (++), (.), div, mod, concat, map, ($), sum)
+import Prelude ((-), String, (==), rem, flip, Bool, Integer, (*), IO, Integral, (++), (.), div, mod, concat, map, ($), sum)
 
 import Data.List (reverse)
 
@@ -51,4 +51,18 @@ sumDigits xs = sum . concat $ map toDigits xs
 --
 
 validate :: Integer -> Bool
-validate = (==) 0 . flip rem 10 . sumDigits . doubleEveryOther . toDigits
+validate = (==) 0 . flip rem 10 . sumDigits . everyOther (* 2) . toDigitsRev
+
+--
+-- Exercise 5
+--
+
+type Peg = String
+type Move = (Peg, Peg)
+
+-- Given the number of discs and names for the three pegs, returns a list of
+-- moves to be performed to move the stack of hanoi discs from the first peg to
+-- the second
+hanoi :: Integer -> Peg -> Peg -> Peg -> [Move]
+hanoi 0 _ _ _ = []
+hanoi n a b c = hanoi (n - 1) a b c ++ [(a, b)] ++ hanoi (n - 1) c a b

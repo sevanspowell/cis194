@@ -47,6 +47,7 @@ sumDigits xs = sum . concat $ map toDigits xs
 -- Exercise 4
 --
 
+-- Validate a credit card number
 validate :: Integer -> Bool
 validate = (==) 0 . flip rem 10 . sumDigits . everyOther (* 2) . toDigitsRev
 

@@ -49,9 +49,9 @@ histogram xs = (graph $ bin xs) ++ axis [0..9]
     bin ys = map (\n -> (n, length $ filter ((==) n) ys)) [0..9]
 
     axis :: [Integer] -> String
-    axis ys = concat $ [""]
-              ++ map (\_ -> "=") ys ++ ["\n"]
-              ++ map show ys        ++ ["\n"]
+    axis ys = ""
+              ++ foldMap (\_ -> "=") ys ++ "\n"
+              ++ foldMap show ys        ++ "\n"
 
     graph :: [(Integer, Int)] -> String
     graph ys = foldr (\f s -> s ++ foldMap (\x -> if snd x >= f then "*" else " ") ys ++ "\n") "" [1..maxFreq]

@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wall #-}
 
-module Homework1 where
+module Homework1.Homework1 where
 
 import           Data.List (null, reverse)
 import           Prelude   (Bool, Integer, Integral, String, concat, div, flip,

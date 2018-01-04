@@ -65,3 +65,5 @@ whatWentWrong = extractMsg . inOrder . build . filter (severity 50)
     extractMsg [] = []
     extractMsg ((LogMessage _ _ msg) : rest) = [msg] ++ extractMsg rest
     extractMsg ((Unknown msg) : rest) = [msg] ++ extractMsg rest
+
+-- Stole all the mustard

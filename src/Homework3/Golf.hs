@@ -38,22 +38,45 @@ localMaxima (x : y : z : rest) = (if y > x && y > z
 localMaxima (_) = []
 
 histogram :: [Integer] -> String
-histogram xs = (graph $ bin xs) ++ axis [0..9]
+histogram xs = (graph $ bin xs domain) ++ axis domain
   where
+    domain :: [Integer]
+    domain = [0..9]
+
     -- Sort list of integers from [0..9] into bins for each integer from [0..9],
     -- showing the number of times the integer occured in the list.
-    bin :: [Integer] -> [(Integer, Int)]
+    bin :: [Integer] -> [Integer] -> [(Integer, Int)]
     -- For all digits from 0 to 9, get a new list with all the elements of the
     -- original list that have the value n (where n is a digit from 0 to 9) and find
     -- the length of that list. Next, place this in a bin.
-    bin ys = map (\n -> (n, length $ filter ((==) n) ys)) [0..9]
+    bin ys dom = map (\n -> (n, length $ filter ((==) n) ys)) dom
 
+    -- Generate an x-axis for the histogram given a range of values for x
     axis :: [Integer] -> String
-    axis ys = foldMap (\_ -> "=") ys    ++ "\n"
-              ++ foldMap show ys        ++ "\n"
+    -- Map each element in the domain to a "=" and reduce the expressions using
+    -- concatenation (mappend of the String Monoid instance), using mempty (""
+    -- for the String Monoid instance) as the original value.
+    axis dom = foldMap (\_ -> "=") dom    ++ "\n"
+    -- Do the same process again but instead map to the string representation of
+    -- the given domain element using 'show'.
+               ++ foldMap show dom        ++ "\n"
 
+    -- Generate the graph for the histogram
     graph :: [(Integer, Int)] -> String
-    graph ys = foldr (\f s -> s ++ foldMap (\x -> if snd x >= f then "*" else " ") ys ++ "\n") "" [1..maxFreq]
+    -- Generate one line of dots for each element in the list [1..maxFreq], use
+    -- foldr to reduce begining at the back of the list so that graph is correct
+    -- way up.
+    --
+    -- The reducing function takes the current freq that we are generating dots
+    -- for and the current string, appending to the end of the current string:
+    --  A list of spaces and dots, one space or dot for each element in the
+    --  bins. A dot is chosen if the freq of the current bin is greater than or
+    --  equal to the current freq, otherwise an empty space is chosen. Each of
+    --  these forms a line in the graph.
+    graph bins = foldr (\f s -> s ++ foldMap (\x -> if snd x >= f then "*" else " ") bins ++ "\n") "" [1..maxFreq]
       where
+        -- The maximum frequency is found by folding over the bins and choosing
+        -- the maximum of the current max frequency and the current bin
+        -- frequency.
         maxFreq :: Int
-        maxFreq = foldr (\a b -> max (snd a) b) 0 ys
+        maxFreq = foldr (\a b -> max (snd a) b) 0 bins

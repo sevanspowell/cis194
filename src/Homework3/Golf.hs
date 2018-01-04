@@ -49,8 +49,7 @@ histogram xs = (graph $ bin xs) ++ axis [0..9]
     bin ys = map (\n -> (n, length $ filter ((==) n) ys)) [0..9]
 
     axis :: [Integer] -> String
-    axis ys = ""
-              ++ foldMap (\_ -> "=") ys ++ "\n"
+    axis ys = foldMap (\_ -> "=") ys    ++ "\n"
               ++ foldMap show ys        ++ "\n"
 
     graph :: [(Integer, Int)] -> String

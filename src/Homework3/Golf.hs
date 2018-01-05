@@ -31,11 +31,28 @@ localMaxima :: [Integer] -> [Integer]
 -- Grab first 3 elements, if second element is a local maxima, add to list, else
 -- don't. Then recursively call function on the original list, minus the first
 -- element
-localMaxima (x : y : z : rest) = (if y > x && y > z
-                                  then [y]
-                                  else [])
-                                 ++ localMaxima (y : z : rest)
+-- 119 chars
+localMaxima (x : y : z : rest) = (if y > x && y > z then [y] else []) ++ localMaxima (y : z : rest)
 localMaxima (_) = []
+
+-- localMaxima' :: [Integer] -> [Integer]
+-- localMaxima' xs = foldMap (\(x, y, z) -> if y > x && y > z then [y] else [])
+--                   $ slidingWindow3 xs
+
+-- localMaxima'' :: [Integer] -> [Integer]
+-- localMaxima'' = map sel2 . filter isLocalMaxima . slidingWindow3
+--   where
+--     isLocalMaxima :: (Ord a) => (a, a, a) -> Bool
+--     isLocalMaxima (a, b, c) = b > a && b > c
+
+--     sel2 :: (a, a, a) -> a
+--     sel2 (_, a, _) = a
+
+slidingWindow3 :: [a] -> [(a, a, a)]
+slidingWindow3 ys = zip3 ys (drop 1 ys) (drop 2 ys)
+
+localMaxima' :: [Integer] -> [Integer]
+localMaxima' = map (\(_, a, _) -> a) . filter (\(a, b, c) -> b > a && b > c) . slidingWindow3
 
 histogram :: [Integer] -> String
 histogram xs = (graph $ bin xs domain) ++ axis domain

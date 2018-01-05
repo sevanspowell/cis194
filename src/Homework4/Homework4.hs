@@ -69,7 +69,7 @@ insert x (Node n l val r)
     ntl = insert x l
     ntr = insert x r
     nhl = height ntl
-    nhr = height ntr 
+    nhr = height ntr
 
 -- Get the height of the tree, the longest path from the root to a leaf.
 height :: Tree a -> Integer
@@ -86,3 +86,22 @@ showTree n@(Node i _ _ _) = go i n
   go _ (Leaf) = ""
   go j (Node _ l c r) = go (j-1) l ++
     replicate (4*fromIntegral j) ' ' ++ show c ++ "\n" ++ go (j-1) r
+
+--
+-- Exercise 3
+--
+
+-- Returns true iff there are an odd number of True values in the given list.
+xor :: [Bool] -> Bool
+xor = foldr (/=) False
+
+map' :: (a -> b) -> [a] -> [b]
+map' f = foldr (\x acc -> [f x] ++ acc) []
+
+myFoldl :: (a -> b -> a) -> a -> [b] -> a
+myFoldl f base xs = foldr (flip f) base $ reverse xs
+
+foldl' :: (a -> b -> a) -> a -> [b] -> a
+foldl' f a bs =
+  -- 'x' essentially 'steals' the 'a' using the identity function
+  foldr (\b g x -> g (f x b)) id bs $ a

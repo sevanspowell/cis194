@@ -101,7 +101,22 @@ map' f = foldr (\x acc -> [f x] ++ acc) []
 myFoldl :: (a -> b -> a) -> a -> [b] -> a
 myFoldl f base xs = foldr (flip f) base $ reverse xs
 
+-- foldr :: (a -> b -> b) -> b -> [a] -> b
 foldl' :: (a -> b -> a) -> a -> [b] -> a
 foldl' f a bs =
   -- 'x' essentially 'steals' the 'a' using the identity function
   foldr (\b g x -> g (f x b)) id bs $ a
+
+--
+-- Exercise 4
+--
+
+-- Given an integer n, generates all the odd prime numbers up to 2*n+2
+sieveSundaram :: Integer -> [Integer]
+sieveSundaram = generatePrimes
+  where
+    generatePrimes :: Integer -> [Integer]
+    generatePrimes n = [2*x + 1 | x <- [1..n], not (x `elem` numsToRemove n)]
+
+    numsToRemove :: Integer -> [Integer]
+    numsToRemove n = filter (< n) [i + j + 2*i*j | i <- [1..n], j<-[i..n]]

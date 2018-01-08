@@ -114,7 +114,7 @@ testSat = testExp :: Maybe Mod7
 
 instance Expr VM.Program where
   lit :: Integer -> VM.Program
-  lit a = (++) [] $ [PushI a] 
+  lit a = (++) [] $ [PushI a]
 
   add :: VM.Program -> VM.Program -> VM.Program
   add a b = a ++ b ++ [VM.Add]
@@ -122,8 +122,15 @@ instance Expr VM.Program where
   mul :: VM.Program -> VM.Program -> VM.Program
   mul a b = a ++ b ++ [VM.Mul]
 
-compile :: String -> Maybe Program 
-compile = parseArithmeticExp
+parseProgram :: String -> Maybe Program
+parseProgram = parseExp lit add mul
+
+compile :: String -> Maybe Program
+compile = parseProgram
+
+execute :: String -> Either String StackVal
+execute = run . compile
   where
-    parseArithmeticExp :: String -> Maybe Program 
-    parseArithmeticExp = parseExp lit add mul
+    run :: Maybe Program -> Either String StackVal
+    run (Just program) = stackVM program
+    run (Nothing) = Left $ "No program provided."

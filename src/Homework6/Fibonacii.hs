@@ -34,7 +34,7 @@ data Stream a = Cons a (Stream a)
 
 instance Show a => Show (Stream a) where
   show :: Stream a -> String
-  show = show . take 20 . streamToList
+  show = show . take 32 . streamToList
 
 streamToList :: Stream a -> [a]
 streamToList (Cons x xs) = x : streamToList xs
@@ -53,13 +53,32 @@ streamFromSeed f x = Cons x (streamFromSeed f (f x))
 nats :: Stream Integer
 nats = streamFromSeed (+ 1) 0
 
--- interleaveStreams :: Stream a -> Stream a -> Stream a
+interleaveStreams :: Stream a -> Stream a -> Stream a
+interleaveStreams (Cons x xs) (Cons y ys) = Cons x (Cons y (interleaveStreams xs ys))
 
-zeroes :: Stream Integer
-zeroes = streamRepeat 0
+ruler :: Stream Integer
+-- Because of repeating patterns of zeroes and ones, can just interleave streams
+-- of these numbers with a stream of numbers that don't follow a repeating
+-- pattern.
+ruler = interleaveStreams zeroes (interleaveStreams ones rulerPattern)
+  where
+    zeroes :: Stream Integer
+    -- For n = 1, 3, 5, 7, ...
+    zeroes = streamRepeat 0
 
-ones :: Stream Integer
-ones = streamRepeat 1
+    ones :: Stream Integer
+    -- For n = 2, 6, 10, 14, ... (alternate multiples of two)
+    ones = streamRepeat 1
 
-sumsOfTwo :: Stream Integer
-sumsOfTwo = streamFromSeed (+ 2) 2
+    rulerPattern :: Stream Integer
+    -- First generate n (alternate multiples of two starting from four),
+    -- skipping any we've included in the streams of ones and zeroes.
+    -- Then map n to the desired number using the numUntilOdd function.
+    rulerPattern = streamMap numUntilOdd $ streamFromSeed (+ 4) 4
+
+    -- Returns the number of divisions by 2 that can be applied to the given integer
+    -- before it becomes an odd number.
+    numUntilOdd :: Integer -> Integer
+    numUntilOdd n
+      | odd n = 0
+      | otherwise = 1 + numUntilOdd (n `div` 2)

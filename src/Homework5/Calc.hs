@@ -8,7 +8,7 @@ module Homework5.Calc where
 import qualified Homework5.ExprT as ExprT
 import Homework5.Parser
 import qualified Homework5.StackVM as VM
-import qualified Data.Map as M
+-- import qualified Data.Map as M
 
 -- Exercise 1
 
@@ -115,7 +115,7 @@ testSat = testExp :: Maybe Mod7
 
 instance Expr VM.Program where
   lit :: Integer -> VM.Program
-  lit a = (++) [] $ [PushI a]
+  lit a = (++) [] $ [VM.PushI a]
 
   add :: VM.Program -> VM.Program -> VM.Program
   add a b = a ++ b ++ [VM.Add]
@@ -138,45 +138,45 @@ execute = run . compile
 
 -- Exercise 6
 
-class HasVars a where
-  var :: String -> a
+-- class HasVars a where
+--   var :: String -> a
 
-data VarExprT = Lit Integer
-           | Add VarExprT VarExprT
-           | Mul VarExprT VarExprT
-           | Var String
-  deriving (Show, Eq)
+-- data VarExprT = Lit Integer
+--            | Add VarExprT VarExprT
+--            | Mul VarExprT VarExprT
+--            | Var String
+--   deriving (Show, Eq)
 
-instance Expr VarExprT where
-  lit :: Integer -> VarExprT
-  lit = Lit
+-- instance Expr VarExprT where
+--   lit :: Integer -> VarExprT
+--   lit = Lit
 
-  add :: VarExprT -> VarExprT -> VarExprT
-  add = Add
+--   add :: VarExprT -> VarExprT -> VarExprT
+--   add = Add
 
-  mul :: VarExprT -> VarExprT -> VarExprT
-  mul = Mul
+--   mul :: VarExprT -> VarExprT -> VarExprT
+--   mul = Mul
 
-instance HasVars VarExprT where
-  var :: String -> VarExprT
-  var = Var
+-- instance HasVars VarExprT where
+--   var :: String -> VarExprT
+--   var = Var
 
-instance HasVars (M.Map String Integer -> Maybe Integer)
-  var :: String -> (M.Map String Integer -> Maybe Integer)
-  var key = (\map -> find map key)
+-- instance HasVars (M.Map String Integer -> Maybe Integer)
+--   var :: String -> (M.Map String Integer -> Maybe Integer)
+--   var key = (\map -> find map key)
 
-instance Expr (M.Map String Integer -> Maybe Integer)
-  lit :: Integer -> (M.Map String Integer -> Maybe Integer)
-  lit x = (\_ -> Just x)
+-- instance Expr (M.Map String Integer -> Maybe Integer)
+--   lit :: Integer -> (M.Map String Integer -> Maybe Integer)
+--   lit x = (\_ -> Just x)
 
-  add :: (M.Map String Integer -> Maybe Integer)
-         -> (M.Map String Integer -> Maybe Integer)
-         -> (M.Map String Integer -> Maybe Integer)
-  add _ (Just a) _ (Just b) = (\map -> Just (a + b))
-  add _ (Nothing) _ (Nothing) = (\map -> Nothing)
+--   add :: (M.Map String Integer -> Maybe Integer)
+--          -> (M.Map String Integer -> Maybe Integer)
+--          -> (M.Map String Integer -> Maybe Integer)
+--   add _ (Just a) _ (Just b) = (\map -> Just (a + b))
+--   add _ (Nothing) _ (Nothing) = (\map -> Nothing)
 
-  mul :: (M.Map String Integer -> Maybe Integer)
-         -> (M.Map String Integer -> Maybe Integer)
-         -> (M.Map String Integer -> Maybe Integer)
-  mul _ (Just a) _ (Just b) = (\map -> Just (a * b))
-  mul _ (Nothing) _ (Nothing) = (\map -> Nothing)
+--   mul :: (M.Map String Integer -> Maybe Integer)
+--          -> (M.Map String Integer -> Maybe Integer)
+--          -> (M.Map String Integer -> Maybe Integer)
+--   mul _ (Just a) _ (Just b) = (\map -> Just (a * b))
+--   mul _ (Nothing) _ (Nothing) = (\map -> Nothing)

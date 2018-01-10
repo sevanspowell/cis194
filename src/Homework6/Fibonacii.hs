@@ -1,5 +1,9 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE InstanceSigs #-}
-module Homework6.Fibonacci where
+{-# OPTIONS_GHC -Wall #-}
+{-# OPTIONS_GHC -fno-warn-missing-methods #-}
+
+module Homework6.Fibonacii where
 
 import Data.List
 
@@ -34,27 +38,27 @@ data Stream a = Cons a (Stream a)
 
 instance Show a => Show (Stream a) where
   show :: Stream a -> String
-  show = show . take 32 . streamToList
+  show = show . take 20 . streamToList
 
 streamToList :: Stream a -> [a]
-streamToList (Cons x xs) = x : streamToList xs
+streamToList (Cons a as) = a : streamToList as
 
 -- Exercise 4
 streamRepeat :: a -> Stream a
-streamRepeat x = Cons x (streamRepeat x)
+streamRepeat a = Cons a (streamRepeat a)
 
 streamMap :: (a -> b) -> Stream a -> Stream b
-streamMap f (Cons a xs) = Cons (f a) (streamMap f xs)
+streamMap f (Cons a as) = Cons (f a) (streamMap f as)
 
 streamFromSeed :: (a -> a) -> a -> Stream a
-streamFromSeed f x = Cons x (streamFromSeed f (f x))
+streamFromSeed f a = Cons a (streamFromSeed f (f a))
 
 -- Exercise 5
 nats :: Stream Integer
 nats = streamFromSeed (+ 1) 0
 
 interleaveStreams :: Stream a -> Stream a -> Stream a
-interleaveStreams (Cons x xs) (Cons y ys) = Cons x (Cons y (interleaveStreams xs ys))
+interleaveStreams (Cons a as) (Cons b bs) = Cons a (Cons b (interleaveStreams as bs))
 
 ruler :: Stream Integer
 -- Because of repeating patterns of zeroes and ones, can just interleave streams
@@ -82,3 +86,58 @@ ruler = interleaveStreams zeroes (interleaveStreams ones rulerPattern)
     numUntilOdd n
       | odd n = 0
       | otherwise = 1 + numUntilOdd (n `div` 2)
+
+-- Exercise 6
+x :: Stream Integer
+x = as
+  where
+    as :: Stream Integer
+    as = (Cons 0 (Cons 1 (streamRepeat 0)))
+
+instance Num (Stream Integer) where
+  fromInteger :: Integer -> Stream Integer
+  fromInteger n = Cons n (streamRepeat 0)
+
+  negate :: Stream Integer -> Stream Integer
+  negate (Cons a as) = Cons (-a) (negate as)
+
+  (+) :: Stream Integer -> Stream Integer -> Stream Integer
+  (+) (Cons a as) (Cons b bs) = Cons (a + b) (as + bs)
+
+  (*) :: Stream Integer -> Stream Integer -> Stream Integer
+  (*) (Cons a as) b'@(Cons b bs) = Cons (a * b) ((fromInteger a)*bs + as*b')
+
+instance Fractional (Stream Integer) where
+  -- http://www.cs.dartmouth.edu/~doug/powser.html
+  (/) :: Stream Integer -> Stream Integer -> Stream Integer
+  (/) (Cons a as) (Cons b bs) = qs
+    where
+      qs = Cons (a `div` b) (fromInteger(1 `div` b)*(as-qs*bs))
+
+fibs4 :: Stream Integer
+fibs4 = x / (1 - x - x*x)
+
+-- Exercise 7
+data Matrix = Matrix Integer Integer Integer Integer
+
+instance Num (Matrix) where
+  fromInteger :: Integer -> Matrix
+  fromInteger n = Matrix n 0 0 n
+  
+  (*) :: Matrix -> Matrix -> Matrix
+  (*) (Matrix a b c d) (Matrix a' b' c' d') =
+    Matrix (a*a' + b*c') (a*b' + b*d') (c*a' + d*c') (c*b' + d*d')
+
+instance Show (Matrix) where
+  show :: Matrix -> String
+  show (Matrix a b c d) = "(" ++ show a
+                          ++ ", " ++ show b
+                          ++ ", " ++ show c
+                          ++ ", " ++ show d ++ ")"
+
+fibs5 :: Integer -> Integer
+fibs5 0 = 0
+fibs5 n = getFn $ (Matrix 1 1 1 0)^(n - 1)
+  where
+    getFn :: Matrix -> Integer
+    getFn (Matrix a _ _ _) = a

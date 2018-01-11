@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# OPTIONS_GHC -Wall #-}
 
@@ -7,6 +8,7 @@ import Data.Monoid
 
 import Homework7.Sized
 import Homework7.Scrabble
+import Homework7.Buffer
 
 -- Exercise 1
 
@@ -93,3 +95,31 @@ takeJ n curr@(Append _ l1 l2)
 scoreLine :: String -> JoinList Score String
 scoreLine [] = Empty
 scoreLine str = Single (scoreString str) str
+
+-- Exercise 4
+
+instance Buffer (JoinList (Score, Size) String) where
+  toString :: JoinList (Score, Size) String -> String
+  toString Empty = ""
+  toString (Single _ str) = str
+  toString (Append _ l1 l2) = toString l1 ++ " " ++ toString l2
+
+  fromString :: String -> JoinList (Score, Size) String
+  fromString str = foldMap (\x -> Single (scoreString x, Size 1) x) (lines str)
+
+  line :: Int -> JoinList (Score, Size) String -> Maybe String
+  line n = indexJ n
+
+  replaceLine :: Int -> String -> JoinList (Score, Size) String
+                  -> JoinList (Score, Size) String
+  replaceLine n xs l = takeJ (n - 1) l +++ fromString xs +++ dropJ n l
+
+  numLines :: JoinList (Score, Size) String -> Int
+  numLines Empty = 0
+  numLines (Single _ _) = 1
+  numLines (Append (_, sz) _ _) = getSize sz
+
+  value :: JoinList (Score, Size) String -> Int
+  value Empty = 0
+  value (Single ((Score scr), _) _)   = scr
+  value (Append ((Score scr), _) _ _) = scr

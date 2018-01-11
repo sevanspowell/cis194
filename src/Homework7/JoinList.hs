@@ -3,8 +3,10 @@
 
 module Homework7.JoinList where
 
-import Homework7.Sized
 import Data.Monoid
+
+import Homework7.Sized
+import Homework7.Scrabble
 
 -- Exercise 1
 
@@ -85,3 +87,9 @@ takeJ n curr@(Append _ l1 l2)
     sizeCurr = sizeAnnot curr
     sizeL1   = sizeAnnot l1 
     newL2    = takeJ (n - sizeAnnot l1) l2
+
+-- Exercise 3
+
+scoreLine :: String -> JoinList Score String
+scoreLine [] = Empty
+scoreLine str = Single (scoreString str) str

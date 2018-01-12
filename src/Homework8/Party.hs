@@ -13,7 +13,7 @@ import Homework8.Employee
 --   GuestList. Note that this is a naive calculation, it merely sums the fun
 --   factors of each employee in the list.
 glCons :: Employee -> GuestList -> GuestList
-glCons emp (GL gl fun) = GL (gl ++ [emp]) (fun + empFun emp)
+glCons emp (GL gl fun) = GL ([emp] ++ gl) (fun + empFun emp)
 
 instance Monoid (GuestList) where
   mempty = GL [] 0
@@ -34,9 +34,24 @@ treeFold f = go where
 
 -- Exercise 3
 
--- nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
--- nextLevel emp [] = (GL [emp] empFun emp, GL [emp] empFun emp) 
--- nextLevel emp ((with, without):xs) = (computeBestWith emp, computeBestWithout emp) 
---   where
---     computeBestWith :: Employee -> GuestList
---     computeBestWith =
+nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
+nextLevel emp [] = (GL [emp] (empFun emp), GL [] 0)
+nextLevel emp xs = (glCons emp $ computeBest moreFunGivenBossPresent xs, computeBest moreFun xs)
+  where
+    -- Fold over list and find GuestList with maximum fun using given maximum
+    -- function to resolve "funness".
+    computeBest :: (GuestList -> GuestList -> GuestList) -> [(GuestList, GuestList)] -> GuestList
+    computeBest maxFunc = foldMap (\(w, wo) -> maxFunc w wo) --foldr (\(w, wo) currMax -> maxFunc (maxFunc currMax wo) w) (maxFunc with without) xs
+
+    -- Return the guest list with the most fun given that the root's immediate
+    -- boss is present. It is assumed the root is at the beginning of the guest
+    -- list.
+    moreFunGivenBossPresent :: GuestList -> GuestList -> GuestList
+    moreFunGivenBossPresent _ wo = wo
+
+-- Exercise 4
+
+maxFun :: Tree Employee -> GuestList
+maxFun t = moreFun (fst results) (snd results)
+  where
+    results = treeFold nextLevel t

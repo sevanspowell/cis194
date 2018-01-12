@@ -44,8 +44,8 @@ nextLevel emp xs = (glCons emp $ computeBest moreFunGivenBossPresent xs, compute
     computeBest maxFunc = foldMap (\(w, wo) -> maxFunc w wo) --foldr (\(w, wo) currMax -> maxFunc (maxFunc currMax wo) w) (maxFunc with without) xs
 
     -- Return the guest list with the most fun given that the root's immediate
-    -- boss is present. It is assumed the root is at the beginning of the guest
-    -- list.
+    -- boss is present. It is assumed that the "without" list of the subtree is
+    -- passed as the second argument to the function.
     moreFunGivenBossPresent :: GuestList -> GuestList -> GuestList
     moreFunGivenBossPresent _ wo = wo
 
@@ -55,3 +55,12 @@ maxFun :: Tree Employee -> GuestList
 maxFun t = moreFun (fst results) (snd results)
   where
     results = treeFold nextLevel t
+
+-- Exercise 5
+
+main :: IO ()
+main = do
+  putStrLn "Please enter a company hierarchy file to read: "
+  file <- readLn
+  str <- readFile file
+  putStrLn . show . maxFun . read $ str

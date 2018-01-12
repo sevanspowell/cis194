@@ -1,12 +1,12 @@
 {-# LANGUAGE InstanceSigs #-}
+{-# OPTIONS_GHC -Wall #-}
 {- CIS 194 HW 10
    due Monday, 1 April
 -}
 
 module Homework10.AParser where
 
-import           Control.Applicative
-import           Control.Monad
+import Control.Applicative
 
 import           Data.Char
 
@@ -69,10 +69,6 @@ posInt = Parser f
 first :: (a -> b) -> (a, c) -> (b, c)
 first f (a, c) = (f a, c)
 
--- | Apply the given function to the second element of a pair only
-second :: (b -> c) -> (a, b) -> (a, c)
-second f (a, b) = (a, f b)
-
 -- Exercise 2
 
 instance Functor Parser where
@@ -83,7 +79,7 @@ instance Functor Parser where
   -- fmap :: ((a, String) -> (b, String)) -> Maybe (a, String) -> Maybe (b, String)
   -- Composing (fmap (first f)) and runParser provides the required type:
   --   String -> Maybe (b, String)
-  fmap f (Parser { runParser = runParser }) = Parser (fmap (first f) . runParser)
+  fmap f p = Parser (fmap (first f) . runParser p)
 
 instance Applicative Parser where
   pure :: a -> Parser a
@@ -97,6 +93,44 @@ instance Applicative Parser where
       -- left of the first parser and then applying the function to the final
       -- parser result.
       extractThenAp :: Parser a -> Maybe ((a -> b), String) -> Maybe (b, String)
-      extractThenAp p2 (Just (f, rest)) = runParser (fmap f p2) $ rest
+      extractThenAp p2' (Just (f, rest)) = runParser (fmap f p2') $ rest
       extractThenAp _ Nothing = Nothing
 
+-- Exercise 3
+
+takeFirst :: a -> b -> a
+takeFirst = const
+
+takeLast :: a -> b -> b
+takeLast = flip const
+
+abParser :: Parser (Char, Char)
+abParser = (,) <$> char 'a' <*> char 'b' 
+
+abParser' :: Parser String
+abParser' = toString <$> char 'a' <*> char 'b' 
+  where
+    toString :: Char -> Char -> String
+    toString a b = [a, b]
+
+abParser'' :: Parser Char
+abParser'' = takeLast <$> char 'a' <*> char 'b' 
+
+abParser_ :: Parser ()
+abParser_ = unit <$> char 'a' <*> char 'b'
+  where
+    unit :: a -> b -> ()
+    unit _ _ = ()
+    -- void = (const (const ()))
+
+intPair :: Parser [Integer]
+intPair = (\a b -> [a, b]) <$> (takeFirst <$> posInt <*> char ' ') <*> posInt
+
+-- Exercise 4
+
+instance Alternative Parser where
+  empty :: Parser a
+  empty = Parser (\_ -> Nothing) 
+
+  (<|>) :: Parser a -> Parser a -> Parser a
+  (<|>) p1 p2 = Parser (\str -> (runParser p1 str) <|> (runParser p2 str))

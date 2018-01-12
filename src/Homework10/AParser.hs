@@ -104,25 +104,30 @@ takeFirst = const
 takeLast :: a -> b -> b
 takeLast = flip const
 
+-- | Parse the character a followed by the character b and return them as a
+--   pair: runParser abParser 'ab' = Just (('a', 'b'), "").
+--
 abParser :: Parser (Char, Char)
-abParser = (,) <$> char 'a' <*> char 'b' 
+abParser = (,) <$> char 'a' <*> char 'b'
 
 abParser' :: Parser String
-abParser' = toString <$> char 'a' <*> char 'b' 
+abParser' = toString <$> char 'a' <*> char 'b'
   where
     toString :: Char -> Char -> String
     toString a b = [a, b]
 
 abParser'' :: Parser Char
-abParser'' = takeLast <$> char 'a' <*> char 'b' 
+abParser'' = takeLast <$> char 'a' <*> char 'b'
 
 abParser_ :: Parser ()
 abParser_ = unit <$> char 'a' <*> char 'b'
   where
     unit :: a -> b -> ()
     unit _ _ = ()
-    -- void = (const (const ()))
+    -- unit = (const (const ()))
 
+-- | Parse a pair of ints separated by whitespace and return them
+--   (e.g. runParser intPair "12 34" == Just ([12, 34])).
 intPair :: Parser [Integer]
 intPair = (\a b -> [a, b]) <$> (takeFirst <$> posInt <*> char ' ') <*> posInt
 
@@ -130,7 +135,13 @@ intPair = (\a b -> [a, b]) <$> (takeFirst <$> posInt <*> char ' ') <*> posInt
 
 instance Alternative Parser where
   empty :: Parser a
-  empty = Parser (\_ -> Nothing) 
+  empty = Parser (\_ -> Nothing)
 
   (<|>) :: Parser a -> Parser a -> Parser a
   (<|>) p1 p2 = Parser (\str -> (runParser p1 str) <|> (runParser p2 str))
+
+-- Exercise 5
+
+-- | Parses either an integer value or an uppercase character, fails otherwise.
+intOrUppercase :: Parser ()
+intOrUppercase = (const () <$> posInt) <|> (const () <$> satisfy isUpper)

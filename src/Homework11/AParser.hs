@@ -79,9 +79,9 @@ instance Applicative Parser where
 
 -- (<*>) :: f ([a] -> [b]) -> f ([a]) -> f ([b])
 
-mySequence :: Applicative f => [f a] -> f [a]
-mySequence [] = pure []
-mySequence (x:xs) = (:) <$> x <*> mySequence xs
+mySequenceA :: Applicative f => [f a] -> f [a]
+mySequenceA [] = pure []
+mySequenceA (x:xs) = (:) <$> x <*> mySequenceA xs
 
 mapA :: (a -> Maybe b) -> ([a] -> Maybe [b])
-mapA f = (\xs -> mySequence $ map f xs)
+mapA f = mySequenceA . map f

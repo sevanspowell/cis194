@@ -86,7 +86,7 @@ instance Applicative Parser where
   pure x = Parser (\str -> Just (x, str))
 
   (<*>) :: Parser (a -> b) -> Parser a -> Parser b
-  (<*>) p1 p2 =  Parser ((extractThenAp p2) . runParser p1)
+  (<*>) p1 p2 = Parser ((extractThenAp p2) . runParser p1)
     where
       -- Take a parser and the results of another parser that produces a
       -- function and chain them together, applying the second parser to what's
@@ -106,7 +106,6 @@ takeLast = flip const
 
 -- | Parse the character a followed by the character b and return them as a
 --   pair: runParser abParser 'ab' = Just (('a', 'b'), "").
---
 abParser :: Parser (Char, Char)
 abParser = (,) <$> char 'a' <*> char 'b'
 
@@ -145,3 +144,4 @@ instance Alternative Parser where
 -- | Parses either an integer value or an uppercase character, fails otherwise.
 intOrUppercase :: Parser ()
 intOrUppercase = (const () <$> posInt) <|> (const () <$> satisfy isUpper)
+

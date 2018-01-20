@@ -85,3 +85,6 @@ mySequenceA (x:xs) = (:) <$> x <*> mySequenceA xs
 
 mapA :: (a -> Maybe b) -> ([a] -> Maybe [b])
 mapA f = mySequenceA . map f
+
+replicateA :: Applicative f => Int -> f a -> f [a]
+replicateA n f = fmap (replicate n) f

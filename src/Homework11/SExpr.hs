@@ -60,23 +60,7 @@ replicateA :: Applicative f => Int -> f a -> f [a]
 replicateA n f = fmap (replicate n) f
 
 zeroOrMore :: Parser a -> Parser [a]
-zeroOrMore p = ((:) <$> p <*> zeroOrMore p) <|> ((\_ -> []) <$> p)
--- zeroOrMore p = (++) <$> (((:) []) <$> p) <*> (((:) []) <$> p)
-  -- where
-  --   go = Parser $ (\str -> case runParser p str of
-  --                             Nothing -> Just ([], str)
-  --                             Just (a, str') -> Just ([a], str'))
+zeroOrMore p = oneOrMore p <|> pure []
 
--- zeroOrMore p = go
---   where
---     go = Parser $ (\str -> case runParser p str of
---                               Nothing -> Just ([], str)
---                               Just (a, str') -> (\(a1, _) (a2, s2) -> (a1 ++ a2, s2)) <$> Just ([a], str') <*> runParser (zeroOrMore p) str')
-
-
--- oneOrMore :: Parser a -> Parser [a]
--- oneOrMore p = go
---   where
---     go = Parser $ (\str -> case runParser p str of
---                               Nothing -> Nothing
---                               Just (a, str') -> (\(a1, _) (a2, s2) -> (a1 ++ a2, s2)) <$> Just ([a], str') <*> runParser (zeroOrMore p) str')
+oneOrMore :: Parser a -> Parser [a]
+oneOrMore p = ((\a -> (++) [a]) <$> p <*> zeroOrMore p) 

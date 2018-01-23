@@ -4,28 +4,47 @@
 
 module Homework11.SExpr where
 
-import Homework11.AParser
-import Control.Applicative
+import           Control.Applicative
+import           Data.Char           (isAlphaNum, isAlpha, isSpace)
+import           Homework11.AParser
+
+------------------------------------------------------------
+--  0. Applicative tools
+------------------------------------------------------------
+
+(*>) :: Applicative f => f a -> f b -> f b
+-- (*>) a b = flip const <$> a <*> b
+(*>) = liftA2 (flip const)
+
+mySequenceA :: Applicative f => [f a] -> f [a]
+mySequenceA []     = pure []
+mySequenceA (x:xs) = (:) <$> x <*> mySequenceA xs
+
+mapA :: (a -> Maybe b) -> ([a] -> Maybe [b])
+mapA f = mySequenceA . map f
+
+replicateA :: Applicative f => Int -> f a -> f [a]
+replicateA n f = fmap (replicate n) f
 
 ------------------------------------------------------------
 --  1. Parsing repetitions
 ------------------------------------------------------------
 
--- zeroOrMore :: Parser a -> Parser [a]
--- zeroOrMore p = undefined
+zeroOrMore :: Parser a -> Parser [a]
+zeroOrMore p = oneOrMore p <|> pure []
 
--- oneOrMore :: Parser a -> Parser [a]
--- oneOrMore p = undefined
+oneOrMore :: Parser a -> Parser [a]
+oneOrMore p = ((\a -> (++) [a]) <$> p <*> zeroOrMore p)
 
 ------------------------------------------------------------
 --  2. Utilities
 ------------------------------------------------------------
 
 spaces :: Parser String
-spaces = undefined
+spaces = zeroOrMore (satisfy isSpace)
 
 ident :: Parser String
-ident = undefined
+ident = (:) <$> satisfy isAlpha <*> zeroOrMore (satisfy isAlphaNum)
 
 ------------------------------------------------------------
 --  3. Parsing S-expressions
@@ -44,23 +63,3 @@ data Atom = N Integer | I Ident
 data SExpr = A Atom
            | Comb [SExpr]
   deriving Show
-
-(*>) :: Applicative f => f a -> f b -> f b
--- (*>) a b = flip const <$> a <*> b
-(*>) = liftA2 (flip const)
-
-mySequenceA :: Applicative f => [f a] -> f [a]
-mySequenceA [] = pure []
-mySequenceA (x:xs) = (:) <$> x <*> mySequenceA xs
-
-mapA :: (a -> Maybe b) -> ([a] -> Maybe [b])
-mapA f = mySequenceA . map f
-
-replicateA :: Applicative f => Int -> f a -> f [a]
-replicateA n f = fmap (replicate n) f
-
-zeroOrMore :: Parser a -> Parser [a]
-zeroOrMore p = oneOrMore p <|> pure []
-
-oneOrMore :: Parser a -> Parser [a]
-oneOrMore p = ((\a -> (++) [a]) <$> p <*> zeroOrMore p) 

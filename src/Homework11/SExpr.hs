@@ -68,7 +68,11 @@ parseAtom :: Parser Atom
 parseAtom =  (N <$> (spaces *> posInt)) <|> (I <$> (spaces *> ident))
 
 parseSExpr :: Parser SExpr
-parseSExpr = (A <$> parseAtom) <|> (Comb <$> ((spaces *> paren *> spaces *> oneOrMore parseSExpr <* paren)))
+parseSExpr = (A <$> parseAtom)
+  <|> (Comb <$> (openParen *> oneOrMore parseSExpr <* closeParen))
+  where
+    openParen :: Parser Char
+    openParen = spaces *> satisfy (== '(') <* spaces
 
-paren :: Parser Char
-paren = satisfy (== '(') <|> satisfy (== ')')
+    closeParen :: Parser Char
+    closeParen = spaces *> satisfy (== ')') <* spaces

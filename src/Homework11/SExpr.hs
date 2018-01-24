@@ -12,9 +12,9 @@ import           Homework11.AParser
 --  0. Applicative tools
 ------------------------------------------------------------
 
-(*>) :: Applicative f => f a -> f b -> f b
+-- (*>) :: Applicative f => f a -> f b -> f b
 -- (*>) a b = flip const <$> a <*> b
-(*>) = liftA2 (flip const)
+-- (*>) = liftA2 (flip const)
 
 mySequenceA :: Applicative f => [f a] -> f [a]
 mySequenceA []     = pure []
@@ -63,3 +63,12 @@ data Atom = N Integer | I Ident
 data SExpr = A Atom
            | Comb [SExpr]
   deriving Show
+
+parseAtom :: Parser Atom
+parseAtom =  (N <$> (spaces *> posInt)) <|> (I <$> (spaces *> ident))
+
+parseSExpr :: Parser SExpr
+parseSExpr = (A <$> parseAtom) <|> (Comb <$> ((spaces *> paren *> spaces *> oneOrMore parseSExpr <* paren)))
+
+paren :: Parser Char
+paren = satisfy (== '(') <|> satisfy (== ')')

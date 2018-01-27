@@ -30,6 +30,8 @@ type Army = Int
 data Battlefield = Battlefield { attackers :: Army, defenders :: Army }
   deriving (Show)
 
+-- Exercise 2
+
 battle :: Battlefield -> Rand StdGen Battlefield
 battle b = kill b (deaths (matchDie (fighters b)))
 
@@ -57,6 +59,7 @@ kill :: Battlefield -> Rand StdGen (Int, Int) -> Rand StdGen Battlefield
 kill (Battlefield { attackers = atks, defenders = defs }) ds =
   ds >>= (\(ads, dds) -> return $ Battlefield { attackers = atks - ads, defenders = defs - dds})
 
+-- Exercise 3
 
 invade :: Battlefield -> Rand StdGen Battlefield
 invade b = battle b
@@ -64,3 +67,19 @@ invade b = battle b
              then return b'
              else invade b'
       )
+
+-- Exercise 4
+
+successProb :: Battlefield -> Rand StdGen Double
+successProb b = replicateM n (invade b)
+  >>= (return . foldr countWin 0)
+  >>= (\numWins -> return $ fromIntegral(numWins) / fromIntegral(n))
+
+  where
+    countWin :: Battlefield -> Int -> Int
+    countWin b acc = if defenders b == 0
+                     then acc + 1
+                     else acc
+
+    n :: Int
+    n = 1000

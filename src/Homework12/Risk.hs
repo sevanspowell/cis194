@@ -28,12 +28,13 @@ die = getRandom
 type Army = Int
 
 data Battlefield = Battlefield { attackers :: Army, defenders :: Army }
+  deriving (Show)
 
 battle :: Battlefield -> Rand StdGen Battlefield
 battle b = kill b (deaths (matchDie (fighters b)))
 
 fighters :: Battlefield -> Battlefield
-fighters b = Battlefield { attackers = min 3 (attackers b)
+fighters b = Battlefield { attackers = min 3 (attackers b - 1)
                          , defenders = min 2 (defenders b) }
 
 rollDiceAndSort :: Int -> Rand StdGen [DieValue]
@@ -41,9 +42,6 @@ rollDiceAndSort n =
   replicateM n die
     >>= (return . sortBy (flip compare))
 
-
--- battle b = go $ fighters b
---   where
 matchDie :: Battlefield -> Rand StdGen [(DieValue, DieValue)]
 matchDie (Battlefield {attackers = atk, defenders = def}) =
   rollDiceAndSort atk
@@ -58,3 +56,11 @@ deaths mas = mas
 kill :: Battlefield -> Rand StdGen (Int, Int) -> Rand StdGen Battlefield
 kill (Battlefield { attackers = atks, defenders = defs }) ds =
   ds >>= (\(ads, dds) -> return $ Battlefield { attackers = atks - ads, defenders = defs - dds})
+
+
+invade :: Battlefield -> Rand StdGen Battlefield
+invade b = battle b
+  >>= (\b' -> if (defenders b' == 0) || (attackers b' < 2)
+             then return b'
+             else invade b'
+      )
